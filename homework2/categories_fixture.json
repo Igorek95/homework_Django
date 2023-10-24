@@ -1,0 +1,18 @@
+[
+{
+  "model": "catalog.category",
+  "pk": 8,
+  "fields": {
+    "name": "Фрукты",
+    "description": "Разнообразные фрукты"
+  }
+},
+{
+  "model": "catalog.category",
+  "pk": 9,
+  "fields": {
+    "name": "Овощи",
+    "description": "Различные виды овощей"
+  }
+}
+]
