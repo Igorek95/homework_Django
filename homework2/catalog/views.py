@@ -1,6 +1,13 @@
 from django.http import HttpResponse
-from django.shortcuts import render
 import logging
+from django.shortcuts import render
+from .models import Product
+
+
+def last_5_products(request):
+    latest_products = Product.objects.order_by('-created_at')[:5]
+    return render(request, 'catalog/last_5_products.html', {'latest_products': latest_products})
+
 
 
 def home(request):

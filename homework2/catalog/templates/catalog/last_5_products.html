@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Последние 5 товаров</title>
+</head>
+<body>
+    <h1>Последние 5 товаров</h1>
+    <ul>
+        {% for product in latest_products %}
+            <li>
+                <strong>{{ product.name }}</strong> - Цена: {{ product.price }} рублей
+            </li>
+        {% empty %}
+            <li>Нет последних товаров.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
