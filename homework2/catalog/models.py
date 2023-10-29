@@ -29,7 +29,7 @@ class Product(models.Model):
         verbose_name_plural = 'Продукты'
 
     def __str__(self):
-        return self.name
+        return f'{self.name} {self.price} {self.description} {self.category} '
 
 
 class Contact(models.Model):
