@@ -1,0 +1,15 @@
+   {% extends 'catalog/base.html' %}
+
+   {% block content %}
+           <form method='post' enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.name }}<br>
+            {{ form.description }}<br>
+            {{ form.image }}<br>
+            {{ form.category }}<br>
+            {{ form.price }}<br>
+            {{ result | safe }}<br>
+            <button type="submit" class="btn btn-warning">Добавить продукт</button>
+        </form>
+
+   {% endblock %}
