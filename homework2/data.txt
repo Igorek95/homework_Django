@@ -1,1 +1,1 @@
-sadfasdfafafsdf
+                                <img src="{% mediapath entry.entry_img %}" alt="product_img" style='max-height: 340px;'>

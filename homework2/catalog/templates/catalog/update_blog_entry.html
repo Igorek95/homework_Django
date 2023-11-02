@@ -1,0 +1,17 @@
+{% extends 'catalog/base.html' %}
+
+{% block title %}
+    <title>Изменение записи в блоге</title>
+{%endblock%}
+
+{% block content %}
+        <form method='post' enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.entry_title }}<br>
+            {{ form.entry_body }}<br>
+            {{ form.entry_img }}<br>
+            Опубликовать запись: {{ form.is_published }}<br>
+            {{ result | safe }}<br>
+            <button type="submit" class="btn btn-warning">Изменить запись</button>
+        </form>
+{%endblock%}

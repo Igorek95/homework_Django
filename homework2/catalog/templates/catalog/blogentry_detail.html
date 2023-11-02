@@ -1,0 +1,31 @@
+ {% extends 'catalog/base.html' %}
+  {% load custom_tags %}
+
+    {% block button_add %}
+        <title>Просмотр записи в блоге</title>
+    {%endblock%}
+
+ {% block content %}
+    <div class='entry' style='weight: 80%; padding: 10px'>
+        <div>
+            <div class='entry_name'>
+                <h4>{{ object.entry_title }}</h4>
+                {% if object.entry_img %}
+                    <<div style='height: 180px;'>
+                            <div class='product_img'>
+                                <img src="{% mediapath object.entry_img %}"  style="max-width:100px">
+                            </div>
+                        </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class='entry_desc'>
+            <h5>{{ object.entry_body|truncatechars:300 }}</h5>
+            <p style='font-size: 15px'>Дата публикации: {{ object.date_created }}</p>
+            <p style='font-size: 15px'>Просмотров: {{ object.views_count }}</p>
+            <a class="btn btn-warning" href="{% url 'catalog:update_entry' pk=object.id %}" role="button">Изменить</a>
+            <a class="btn btn-danger" href="{% url 'catalog:delete_entry' pk=object.id %}" role="button">Удалить</a>
+        </div>
+    </div>
+{%endblock%}

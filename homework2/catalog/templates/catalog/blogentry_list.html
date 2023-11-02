@@ -1,0 +1,64 @@
+ {% extends 'catalog/base.html' %}
+ {% load custom_tags %}
+
+    {% block button_add %}
+        <p class="lead font-weight-normal">Блог.</p>
+        <a class="btn btn-outline-secondary" href="{% url 'catalog:add_entry' %}">Добавить Запись</a>
+    {%endblock%}
+
+    {% block content %}
+
+
+    <div class="d-md-flex flex-md-equal w-auto my-md-auto pl-md-auto">
+        {% for object in object_list %}
+            <div class="bg-dark mr-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center text-white overflow-hidden">
+
+                <div class="my-3 py-3">
+                    <h2 class="display-5">{{object.name | title}}</h2>
+                    {% if object.entry_img %}
+                        <div style='height: 100px; '>
+                            <a href="{% url 'catalog:list_entry' %}{{ entry.id }}" style='color: white'>
+                            <div class='entry_name'>
+                            <h4>{{ object.entry_title }} </h4>
+                        </div>
+                        <div style='height: 180px;'>
+                            <div class='product_img'>
+                                <img src="{% mediapath object.entry_img %}"  style="max-width:100px">
+                            </div>
+                        </div>
+
+                        </a>
+                        </div>
+                    {% else %}
+                        <div style='height: 40px; '>
+                            <a href="{% url 'catalog:list_entry' %}{{ entry.id }}" style='color: white'>
+                            <div class='entry_name'>
+                                <h4>{{ object.entry_title }} </h4>
+                            </div>
+                            </a>
+                        </div>
+                    {% endif %}
+                        <div class='entry_desc'>
+                            <h5>{{ object.entry_body|truncatechars:300 }}</h5>
+                            <p style='font-size: 15px'>Дата публикации: {{ object.date_created }}</p>
+                            <p style='font-size: 15px'>Просмотров: {{ object.views_count }}</p>
+                            <a class="btn btn-warning" href="{% url 'catalog:entry_details' pk=object.id %}" role="button">Подробнее</a>
+                            <a class="btn btn-warning" href="{% url 'catalog:update_entry' pk=object.id %}" role="button">Изменить</a>
+                            <a class="btn btn-danger" href="{% url 'catalog:delete_entry' pk=object.id %}" role="button">Удалить</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+ {% endfor %}
+
+
+    <footer class="text-muted">
+      <div class="container">
+        <p class="float-right">
+          <a href="#">Back to top</a>
+        </p>
+        <p>&copy; 2023 - {% now 'Y' %} </p>
+      </div>
+
+    </footer>
+   {% endblock %}
