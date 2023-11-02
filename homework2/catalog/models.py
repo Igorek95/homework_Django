@@ -43,3 +43,27 @@ class Contact(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class BlogEntry(models.Model):
+    entry_title = models.CharField(
+        max_length=150, verbose_name='заголовок')
+    entry_slug = models.CharField(
+        max_length=150, verbose_name='slug')
+    entry_body = models.TextField(verbose_name='содержимое')
+    entry_img = models.ImageField(
+        upload_to='entry_img/', verbose_name='изображение', **NULLABLE)
+    date_created = models.DateField(
+        verbose_name="дата создания", auto_now_add=True)
+    is_published = models.BooleanField(
+        verbose_name="признак публикации", default=False)
+    views_count = models.IntegerField(
+        verbose_name="количество просмотров", default=0)
+
+    def __str__(self):
+        # Строковое отображение объекта
+        return f'Название:{self.entry_title} Создание:{self.date_created} Опубликовано:{self.is_published} Просмотры:{self.views_count}'
+
+    class Meta:
+        verbose_name = 'Топик'  # Настройка для наименования одного объекта
+        verbose_name_plural = 'Топики'  # Настройка для наименования набора объектов
