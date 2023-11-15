@@ -1,0 +1,36 @@
+{% extends 'catalog/base.html' %}
+{% load custom_tags %}
+{% block content %}
+  <div class="container mt-3">
+    <div class="row">
+      <div class="col-md-8">
+        <h2 class="display-5">{{ object.name | title }}</h2>
+        {% if object.image %}
+          <div class='product_img'>
+            <img src="{% mediapath object.image %}" style="max-width:100px">
+          </div>
+        {% endif %}
+        <p class="card-text">{{ object.description }}</p>
+        <p class="card-text">Цена: {{ object.price }} руб.</p>
+        {% with active_version=object.active_version %}
+          {% if active_version %}
+            <p class="card-text">Активная версия: {{ active_version.version_name }} ({{ active_version.version_number }})</p>
+          {% endif %}
+        {% endwith %}
+        <div class="card-body">
+          <a class="btn btn-warning" href="{% url 'catalog:update_product' object.id %}" role="button">Изменить</a>
+          <a class="btn btn-danger" href="{% url 'catalog:delete_product' object.id %}" role="button">Удалить</a>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <hr>
+        <h3 class="mb-3">Управление версиями</h3>
+        <form method="post" action="{% url 'catalog:create_version' object.id %}">
+          {% csrf_token %}
+          {{ version_form.as_p }}
+          <button type="submit" class="btn btn-primary">Добавить версию</button>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

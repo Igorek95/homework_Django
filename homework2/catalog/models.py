@@ -1,4 +1,9 @@
+
 from django.db import models
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 NULLABLE = {'null': True, 'blank': True}
 
@@ -30,6 +35,10 @@ class Product(models.Model):
 
     def __str__(self):
         return f'{self.name} {self.price} {self.description} {self.category} '
+
+    @property
+    def active_version(self):
+        return self.versions.filter(is_active=True).first()
 
 
 class Contact(models.Model):
@@ -65,5 +74,29 @@ class BlogEntry(models.Model):
         return f'Название:{self.entry_title} Создание:{self.date_created} Опубликовано:{self.is_published} Просмотры:{self.views_count}'
 
     class Meta:
-        verbose_name = 'Топик'  # Настройка для наименования одного объекта
-        verbose_name_plural = 'Топики'  # Настройка для наименования набора объектов
+        verbose_name = 'Топик'
+        verbose_name_plural = 'Топики'
+
+
+class Version(models.Model):
+    product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='versions')
+    version_number = models.CharField(max_length=50)
+    version_name = models.CharField(max_length=100)
+    is_active = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = 'Версия'
+        verbose_name_plural = 'Версии'
+
+    def clean(self):
+        if self.is_active and getattr(self, 'product', None) and self.product.versions.filter(is_active=True).exclude(pk=self.pk).exists():
+            raise ValidationError("A product can have only one active version.")
+
+    def __str__(self):
+        return f"{self.product.name} - {self.version_number} ({'Active' if self.is_active else 'Inactive'})"
+
+
+@receiver(post_save, sender=Version)
+def update_active_version(sender, instance, **kwargs):
+    if instance.is_active:
+        instance.product.versions.exclude(pk=instance.pk).update(is_active=False)
