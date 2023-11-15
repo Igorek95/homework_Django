@@ -1,12 +1,12 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseBadRequest
 import logging
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, ListView, CreateView, UpdateView, DeleteView
 from pytils.translit import slugify
 
-from .forms import ProductForm, EntryForm
-from .models import Product, BlogEntry
+from .forms import ProductForm, EntryForm, VersionForm
+from .models import Product, BlogEntry, Version
 
 
 def last_5_products(request):
@@ -37,58 +37,63 @@ def contacts(request):
 
 class ProductListView(ListView):
     model = Product
-    paginate_by = 6
     context_object_name = 'products'
     template_name = 'catalog/products_list.html'
 
-# def products(request):
-#     products = Product.objects.all()
-#     context = {'object_list': products}
-#     return render(request, 'catalog/products_list.html', context)
+    def get_queryset(self):
+        return Product.objects.all().prefetch_related('versions')
 
 
 class ProductDetailView(DetailView):
     model = Product
-    template_name = 'catalog/product_list.html'
+    template_name = 'catalog/product_detail.html'
 
-# def product(requests, pk):
-#     product = Product.objects.get(pk=pk)
-#     context = {
-#         'object': product
-#     }
-#     return render(requests, 'catalog/product_list.html', context)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['version_form'] = VersionForm()
+        return context
+
+    def create_version(request, pk):
+        product = get_object_or_404(Product, pk=pk)
+
+        if request.method == 'POST':
+            version_form = VersionForm(request.POST)
+            if version_form.is_valid():
+                version_data = version_form.cleaned_data
+                product.create_version(version_data)
+                return redirect('catalog:product', pk=pk)
+        else:
+            version_form = VersionForm()
+
+        return render(request, 'catalog/product_detail.html', {'object': product, 'version_form': version_form})
 
 
 class ProductCreateView(CreateView):
     model = Product
     form_class = ProductForm
-    template_name = 'catalog/add_product.html'
+    template_name = 'catalog/product_form.html'
+    success_url = reverse_lazy('catalog:products')
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        result = "<h5 style='background-color: #00b91f; color: black; border-radius: 7px; height: 30px; text-align: center;'>Продукт добавлен!</h5>"
+        return render(self.request, self.template_name, {'form': form, 'result': result})
 
 
-    def post(self, request, *args, **kwargs):
-        form = ProductForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            result = "<h5 style='background-color: #00b91f; color: black; border-radius: 7px; height: 30px; text-align: center;'>Продукт добавлен!</h5>"
-            form = ProductForm()
-        else:
-            result = "<h5 style='background-color: #a50000; color: black; border-radius: 7px; height: 30px; text-align: center;'>Неправильно заполнены данные!</h5>"
-        return render(request, self.template_name, {'form': form, 'result': result})
+class ProductUpdateView(UpdateView):
+    model = Product
+    form_class = ProductForm
+    template_name = 'catalog/product_form.html'
+    success_url = reverse_lazy('catalog:products')
 
-# def add_product(request):
-#     result = ''
-#     if request.method == 'POST':
-#         form = ProductForm(request.POST, request.FILES)
-#         if form.is_valid():
-#             print(form.__dict__)
-#             form.save()
-#             result = "<h5 style='background-color: #00b91f; color: black; border-radius: 7px; height: 30px; text-align: center;'>Продукт добавлен!</h5>"
-#             form = ProductForm()
-#         else:
-#             result = "<h5 style='background-color: #a50000; color: black; border-radius: 7px; height: 30px; text-align: center;'>Неправильно заполнены данные!</h5>"
-#     else:
-#         form = ProductForm()
-#     return render(request, 'catalog/add_product.html', {'form': form, 'result': result})
+
+class ProductDeleteView(DeleteView):
+    model = Product
+    template_name = 'catalog/product_confirm_delete.html'
+    success_url = reverse_lazy('catalog:products')
+
+    def get(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
 
 
 class EntryCreateView(CreateView):
@@ -154,3 +159,17 @@ class EntryDeleteView(DeleteView):
     model = BlogEntry
     template_name = 'catalog/blogentry_confirm_delete.html'
     success_url = reverse_lazy('catalog:list_entry')
+
+
+class CreateVersionView(CreateView):
+    template_name = 'catalog/create_version.html'
+    form_class = VersionForm
+    model = Version
+
+    def form_valid(self, form):
+        product_id = self.kwargs['product_id']
+        product = get_object_or_404(Product, id=product_id)
+        version = form.save(commit=False)
+        version.product = product
+        version.save()
+        return redirect('catalog:product', pk=product_id)

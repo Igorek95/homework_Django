@@ -1,38 +1,46 @@
-from catalog.models import Product, Category, BlogEntry
+from django.urls import reverse
+
+from .models import Product, Category, BlogEntry, Version
 from django import forms
 
 
 
 class ProductForm(forms.ModelForm):
-
     class Meta:
         model = Product
-        fields = ("name", "description",
-                  "image", "category", "price")
-        categories = Category.objects.values('name', 'name')
+        fields = '__all__'
 
-        widgets = {
-            "name": forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Название'
-            }),
-            "description": forms.Textarea(attrs={
-                'class': 'form-control',
-                'placeholder': 'Описание'
-            }),
-            "image": forms.FileInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Картинка'
-            }),
-            "category": forms.Select(choices=categories, attrs={
-                'class': 'form-control',
-                'placeholder': 'Категория'
-            }),
-            "price": forms.NumberInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Цена в рублях'
-            }),
-        }
+    def create_version(self, version_data):
+        version = self.versions.create(**version_data)
+        return version
+
+    def get_absolute_url(self):
+        return reverse('catalog:product', args=[str(self.id)])
+
+    def clean_name(self):
+        forbidden_words = ['казино', 'криптовалюта', 'крипта', 'биржа', 'дешево', 'бесплатно', 'обман', 'полиция', 'радар']
+        name = self.cleaned_data['name'].lower()
+        for word in forbidden_words:
+            if word in name:
+                raise forms.ValidationError(f'Слово "{word}" запрещено в названии продукта.')
+        return name
+
+    def clean_description(self):
+        forbidden_words = ['казино', 'криптовалюта', 'крипта', 'биржа', 'дешево', 'бесплатно', 'обман', 'полиция', 'радар']
+        description = self.cleaned_data['description'].lower()
+        for word in forbidden_words:
+            if word in description:
+                raise forms.ValidationError(f'Слово "{word}" запрещено в описании продукта.')
+        return description
+
+
+class VersionForm(forms.ModelForm):
+    class Meta:
+        model = Version
+        fields = ['version_number', 'version_name', 'is_active']
+
+    def __init__(self, *args, **kwargs):
+        super(VersionForm, self).__init__(*args, **kwargs)
 
 
 class EntryForm(forms.ModelForm):
