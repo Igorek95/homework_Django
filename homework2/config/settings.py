@@ -11,10 +11,10 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 import os
 from pathlib import Path
+from .data import EMAIL_HOST_PASSWORD, EMAIL_HOST_USER
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -26,7 +26,6 @@ SECRET_KEY = 'django-insecure-%gh5i=v8902x&@l-)q^g3mkv**8#ob-xp+taqm$2)mf^a+7)92
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -40,8 +39,8 @@ INSTALLED_APPS = [
 
     'catalog',
     'crispy_forms',
+    'users',
 ]
-
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
@@ -78,7 +77,6 @@ TEMPLATE_LOADERS = (
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
@@ -92,8 +90,6 @@ DATABASES = {
         'PORT': '',
     }
 }
-
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -113,7 +109,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
@@ -125,12 +120,10 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = '/static/'
-
 
 STATICFILES_DIRS = (
     BASE_DIR / 'static',
@@ -143,3 +136,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+AUTH_USER_MODEL = 'users.User'
+LOGIN_URL = '/user/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.mail.ru'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = EMAIL_HOST_USER
+EMAIL_HOST_PASSWORD = EMAIL_HOST_PASSWORD
+
+DEFAULT_FROM_EMAIL = 'dzerbuni@mail.ru'

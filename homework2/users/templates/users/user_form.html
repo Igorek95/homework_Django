@@ -1,0 +1,23 @@
+{% extends 'catalog/base.html' %}
+
+{% block title %}
+    <title>Профиль</title>
+{% endblock %}
+
+{% block content %}
+        <form method='post' enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class='row'>
+                <div class='col-4'>
+                    <div class='card' style='background-color: #1d1d1d; padding: 13px; margin: 7px; color: white; border: 2px solid #ffd900; font-size: 20px;'>
+                        {{ form.as_p }}
+
+                        <a href="{% url 'change_password' %}" class="btn btn-outline-primary" style='margin-top: 5px; margin-bottom: 5px; width:160px'>Сменить пароль</a>
+                        <button type="submit" class="btn btn-warning" style='margin-top: 5px; margin-bottom: 5px; width:160px'>Сохранить</button>
+                        <a class="btn btn-danger" href="{% url 'logout' %}" role="button" style='margin-top: 5px; margin-bottom: 5px; width:160px'>Выйти из аккаунта</a>
+                    </div>
+                </div>
+                
+            </div>
+        </form>
+{%endblock%}
