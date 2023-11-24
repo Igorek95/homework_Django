@@ -1,0 +1,21 @@
+{% extends 'catalog/base.html' %}
+
+{% block title %}
+    <title>Регистрация</title>
+{% endblock %}
+
+{% block content %}
+    <div class='container'>
+        <form method='post' enctype="multipart/form-data" class="text-center">
+            {% csrf_token %}
+            <div class='row justify-content-center'>
+                <div class='col-12 col-md-4'>
+                    <div class='card' style='background-color: #1d1d1d; padding: 13px; margin: 7px; color: white; border: 2px solid #ffd900; font-size: 20px;'>
+                        {{ form.as_p }}
+                        <button type="submit" class="btn btn-warning">Регистрация</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}
