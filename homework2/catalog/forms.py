@@ -4,8 +4,7 @@ from .models import Product, Category, BlogEntry, Version
 from django import forms
 
 
-
-class ProductForm(forms.ModelForm):
+class ProductFormAdmin(forms.ModelForm):
     class Meta:
         model = Product
         fields = '__all__'
@@ -32,6 +31,21 @@ class ProductForm(forms.ModelForm):
             if word in description:
                 raise forms.ValidationError(f'Слово "{word}" запрещено в описании продукта.')
         return description
+
+
+class ProductFormUser(ProductFormAdmin):
+
+    class Meta:
+        model = Product
+        fields = ("name", "description",
+                  "image", "category", "price")
+
+
+class ProductFormModerator(ProductFormAdmin):
+
+    class Meta:
+        model = Product
+        fields = ('description', 'is_published', 'category')
 
 
 class VersionForm(forms.ModelForm):

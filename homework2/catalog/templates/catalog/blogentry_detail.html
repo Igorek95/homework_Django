@@ -24,8 +24,12 @@
             <h5>{{ object.entry_body|truncatechars:300 }}</h5>
             <p style='font-size: 15px'>Дата публикации: {{ object.date_created }}</p>
             <p style='font-size: 15px'>Просмотров: {{ object.views_count }}</p>
+            {% if perms.catalog.change_blogentry %}
             <a class="btn btn-warning" href="{% url 'catalog:update_entry' pk=object.id %}" role="button">Изменить</a>
+            {% endif %}
+            {% if perms.catalog.delete_blogentry %}
             <a class="btn btn-danger" href="{% url 'catalog:delete_entry' pk=object.id %}" role="button">Удалить</a>
+            {% endif %}
         </div>
     </div>
 {%endblock%}

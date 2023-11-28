@@ -5,6 +5,8 @@ from django.utils.translation import gettext_lazy as _
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+from users.models import User
+
 NULLABLE = {'null': True, 'blank': True}
 
 
@@ -28,8 +30,14 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Цена за покупку')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
     last_modified = models.DateTimeField(auto_now=True, verbose_name='Дата последнего изменения')
+    user = models.ForeignKey(User, verbose_name=_(
+        "пользователь"), on_delete=models.CASCADE, default=None, **NULLABLE)
+    is_published = models.BooleanField(_("опубликовано"), default=False)
 
     class Meta:
+        permissions = (
+            ('set_published', ' desk, published, category'),
+        )
         verbose_name = 'Продукт'
         verbose_name_plural = 'Продукты'
 

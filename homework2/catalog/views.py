@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import PermissionRequiredMixin, UserPassesTestMixin
 from django.http import HttpResponse, HttpResponseBadRequest
 import logging
 from django.shortcuts import render, get_object_or_404, redirect
@@ -5,7 +6,7 @@ from django.urls import reverse_lazy
 from django.views.generic import DetailView, ListView, CreateView, UpdateView, DeleteView
 from pytils.translit import slugify
 
-from .forms import ProductForm, EntryForm, VersionForm
+from .forms import  EntryForm, VersionForm, ProductFormAdmin, ProductFormUser, ProductFormModerator
 from .models import Product, BlogEntry, Version
 
 
@@ -41,12 +42,57 @@ class ProductListView(ListView):
     template_name = 'catalog/products_list.html'
 
     def get_queryset(self):
-        return Product.objects.all().prefetch_related('versions')
+        if self.request.user.is_superuser or self.request.user.has_perm('catalog.set_published'):
+            data = Product.objects.all().order_by('-last_modified')
+        else:
+            data = Product.objects.filter(
+                is_published=True).order_by('-last_modified')
+        return data
 
 
 class ProductDetailView(DetailView):
     model = Product
     template_name = 'catalog/product_detail.html'
+
+
+
+class ProductCreateView(PermissionRequiredMixin, CreateView):
+    model = Product
+    template_name = 'catalog/product_form.html'
+    permission_required = "catalog.add_product"
+    success_url = reverse_lazy('catalog:products')
+
+    def get_form_class(self):
+        if self.request.user.is_superuser:
+            self.form_class = ProductFormAdmin
+        else:
+            self.form_class = ProductFormUser
+        return super().get_form_class()
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        result = "<h5 style='background-color: #00b91f; color: black; border-radius: 7px; height: 30px; text-align: center;'>Продукт добавлен!</h5>"
+        return render(self.request, self.template_name, {'form': form, 'result': result})
+
+
+class ProductUpdateView(UserPassesTestMixin,  UpdateView):
+    model = Product
+    template_name = 'catalog/product_form.html'
+    success_url = reverse_lazy('catalog:products')
+
+    def get_form_class(self):
+        if self.request.user.is_superuser:
+            self.form_class = ProductFormAdmin
+        elif self.request.user == self.object.user:
+            self.form_class = ProductFormUser
+        elif self.request.user.has_perm('catalog.set_published'):
+            self.form_class = ProductFormModerator
+        return super().get_form_class()
+
+    def test_func(self):
+        return self.request.user.is_superuser or \
+            self.request.user == self.get_object().user or \
+            self.request.user.has_perm('catalog.set_published')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -65,42 +111,24 @@ class ProductDetailView(DetailView):
         else:
             version_form = VersionForm()
 
-        return render(request, 'catalog/product_detail.html', {'object': product, 'version_form': version_form})
+        return render(request, 'catalog/product_form.html', {'object': product, 'version_form': version_form})
 
-
-class ProductCreateView(CreateView):
-    model = Product
-    form_class = ProductForm
-    template_name = 'catalog/product_form.html'
-    success_url = reverse_lazy('catalog:products')
-
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        result = "<h5 style='background-color: #00b91f; color: black; border-radius: 7px; height: 30px; text-align: center;'>Продукт добавлен!</h5>"
-        return render(self.request, self.template_name, {'form': form, 'result': result})
-
-
-class ProductUpdateView(UpdateView):
-    model = Product
-    form_class = ProductForm
-    template_name = 'catalog/product_form.html'
-    success_url = reverse_lazy('catalog:products')
-
-
-class ProductDeleteView(DeleteView):
+class ProductDeleteView(PermissionRequiredMixin, DeleteView):
     model = Product
     template_name = 'catalog/product_confirm_delete.html'
+    permission_required = "catalog.delete_product"
     success_url = reverse_lazy('catalog:products')
 
     def get(self, request, *args, **kwargs):
         return self.post(request, *args, **kwargs)
 
 
-class EntryCreateView(CreateView):
+class EntryCreateView(PermissionRequiredMixin, CreateView):
     model = BlogEntry
     form_class = EntryForm
     template_name = 'catalog/add_blog_entry.html'
     success_url = 'catalog:list_entry'
+    permission_required = "catalog.add_blogentry"
 
     def post(self, request, *args, **kwargs):
         form = EntryForm(request.POST, request.FILES)
@@ -140,9 +168,10 @@ class EntryListView(ListView):
         return data
 
 
-class EntryUpdateView(UpdateView):
+class EntryUpdateView(PermissionRequiredMixin, UpdateView):
     model = BlogEntry
     form_class = EntryForm
+    permission_required = "catalog.change_blogentry"
     template_name = 'catalog/update_blog_entry.html'
 
     def form_valid(self, form):
@@ -151,13 +180,14 @@ class EntryUpdateView(UpdateView):
             saved_form.entry_slug = slugify(
                 saved_form.entry_title)
             saved_form.save()
-            EntryUpdateView.success_url = f'{reverse_lazy("catalog:list_entry")}{saved_form.pk}'
+            EntryUpdateView.success_url = reverse_lazy('catalog:list_entry')
         return super().form_valid(form)
 
 
-class EntryDeleteView(DeleteView):
+class EntryDeleteView(PermissionRequiredMixin, DeleteView):
     model = BlogEntry
     template_name = 'catalog/blogentry_confirm_delete.html'
+    permission_required = "catalog.delete_blogentry"
     success_url = reverse_lazy('catalog:list_entry')
 
 
