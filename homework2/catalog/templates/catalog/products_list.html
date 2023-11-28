@@ -2,7 +2,9 @@
 {% load custom_tags %}
 {% block button_add %}
   {% if user.is_authenticated %}
+  {% if perms.catalog.add_product %}
     <a class="btn btn-outline-secondary" href="{% url 'catalog:add_product' %}">Добавить Товар</a>
+  {% endif %}
   {% else %}
           <p>Зарегистрируйтесь или Авторизуйтесь</p>
   {% endif %}
@@ -29,18 +31,20 @@
             </div>
             <div class="card-body">
               <p class="card-text">Цена: {{ product.price }} руб.</p>
+              {% if perms.catalog.set_published or user.is_superuser or product.user == user %}
               <a class="btn btn-warning" href="{% url 'catalog:product' product.id %}" role="button">Подробнее</a>
-              <a class="btn btn-danger" href="{% url 'catalog:delete_product' product.id %}" role="button">Удалить</a>
               <a class="btn btn-info" href="{% url 'catalog:update_product' product.id %}" role="button">Изменить</a>
+              {% endif %}
+              {% if perms.catalog.delete_product %}
+              <a class="btn btn-danger" href="{% url 'catalog:delete_product' product.id %}" role="button">Удалить</a>
+              {% endif %}
             </div>
           </div>
         {% endfor %}
       </div>
       <footer class="text-muted">
         <div class="container">
-          <p class="float-right">
-            <a href="#">Back to top</a>
-          </p>
+          <p class="float-right"></p>
           <p>&copy; 2023 - {% now 'Y' %}</p>
         </div>
       </footer>

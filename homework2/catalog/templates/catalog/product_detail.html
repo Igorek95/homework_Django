@@ -18,8 +18,12 @@
           {% endif %}
         {% endwith %}
         <div class="card-body">
+          {% if perms.catalog.set_published or user.is_superuser or product.user == user %}
           <a class="btn btn-warning" href="{% url 'catalog:update_product' object.id %}" role="button">Изменить</a>
+          {% endif %}
+          {% if perms.catalog.delete_product %}
           <a class="btn btn-danger" href="{% url 'catalog:delete_product' object.id %}" role="button">Удалить</a>
+          {% endif %}
         </div>
       </div>
       <div class="col-md-4">

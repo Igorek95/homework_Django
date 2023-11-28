@@ -2,8 +2,9 @@ from collections.abc import Iterable
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
-from catalog.models import NULLABLE
 from django.utils.crypto import get_random_string
+
+NULLABLE = {'null': True, 'blank': True}
 
 
 class User(AbstractUser):

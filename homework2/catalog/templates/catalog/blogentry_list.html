@@ -4,7 +4,9 @@
     {% block button_add %}
        {% if user.is_authenticated %}
             <p class="lead font-weight-normal">Блог.</p>
+            {% if perms.catalog.add_blogentry %}
             <a class="btn btn-outline-secondary" href="{% url 'catalog:add_entry' %}">Добавить Запись</a>
+            {% endif %}
        {% else %}
               <p>Зарегистрируйтесь или Авторизуйтесь</p>
         {% endif %}
@@ -46,8 +48,12 @@
                                     <p style='font-size: 15px'>Дата публикации: {{ object.date_created }}</p>
                                     <p style='font-size: 15px'>Просмотров: {{ object.views_count }}</p>
                                     <a class="btn btn-warning" href="{% url 'catalog:entry_details' pk=object.id %}" role="button">Подробнее</a>
+                                    {% if perms.catalog.change_blogentry %}
                                     <a class="btn btn-warning" href="{% url 'catalog:update_entry' pk=object.id %}" role="button">Изменить</a>
+                                    {% endif %}
+                                    {% if perms.catalog.delete_blogentry %}
                                     <a class="btn btn-danger" href="{% url 'catalog:delete_entry' pk=object.id %}" role="button">Удалить</a>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
