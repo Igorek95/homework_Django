@@ -204,6 +204,13 @@ class CreateVersionView(CreateView):
     template_name = 'catalog/create_version.html'
     form_class = VersionForm
     model = Version
+    context_object_name = 'versions'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        product_id = self.kwargs['product_id']
+        context['object'] = get_object_or_404(Product, id=product_id)
+        return context
 
     def form_valid(self, form):
         product_id = self.kwargs['product_id']

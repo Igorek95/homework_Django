@@ -2,7 +2,8 @@
 
 {% block content %}
   <h2>Create Version</h2>
-  <form method="post" action="{% url 'catalog:create_version' product_id %}">
+  <form method="post" action="{% url 'catalog:create_version' object.pk %}">
+
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit">Create Version</button>
