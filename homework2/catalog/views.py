@@ -1,13 +1,13 @@
 from django.contrib.auth.mixins import PermissionRequiredMixin, UserPassesTestMixin
 from django.http import HttpResponse, HttpResponseBadRequest
-import logging
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, ListView, CreateView, UpdateView, DeleteView
 from pytils.translit import slugify
 
 from .forms import  EntryForm, VersionForm, ProductFormAdmin, ProductFormUser, ProductFormModerator
-from .models import Product, BlogEntry, Version
+from .models import Product, BlogEntry, Version, Category
+from .services  import get_category_list
 
 
 def last_5_products(request):
@@ -53,6 +53,15 @@ class ProductListView(ListView):
 class ProductDetailView(DetailView):
     model = Product
     template_name = 'catalog/product_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        try:
+            context['version'] = Version.objects.get(
+                product=context['object'], is_active=True)
+        except:
+            pass
+        return context
 
 
 
@@ -203,3 +212,12 @@ class CreateVersionView(CreateView):
         version.product = product
         version.save()
         return redirect('catalog:product', pk=product_id)
+
+
+class CategoryListView(ListView):
+    model = Category
+    context_object_name = 'categories'
+    # template_name = 'catalog/product_list.html'
+
+    def get_queryset(self):
+        return get_category_list()
