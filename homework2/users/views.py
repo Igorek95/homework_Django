@@ -22,8 +22,6 @@ class RegisterView(CreateView):
         url = reverse('verify_email_link', args=[
             self.object.email_verification_token])
         full_url = self.request.build_absolute_uri(url)
-        print(self.object.email)
-        print(full_url)
         send_verification_code(self.object.email, full_url)
 
         return reverse_lazy('verify_email_sent')
