@@ -5,6 +5,7 @@
         </a>
         <a class="py-2 d-none d-md-inline-block" href="{% url 'catalog:home' %}">Главная</a>
         <a class="py-2 d-none d-md-inline-block" href="{% url 'catalog:products' %}">Товары</a>
+        <a class="py-2 d-none d-md-inline-block" href="{% url 'catalog:categories' %}">Категории</a>
         <a class="py-2 d-none d-md-inline-block" href="{% url 'catalog:contact' %}">Контакты</a>
         <a class="py-2 d-none d-md-inline-block" href="{% url 'catalog:list_entry' %}">Блог</a>
         {% if user.is_authenticated %}
